@@ -1,6 +1,7 @@
 from random import randint
 
 import pygame
+
 from grid import Grid
 
 
@@ -36,6 +37,18 @@ class Game:
             pygame.draw.line(screen, (0, 0, 0), (0, i * self.breadth), (self.breadth * self.grid.size, i * self.breadth), 1)
             pygame.draw.line(screen, (0, 0, 0), (i * self.breadth, 0), (i * self.breadth, self.breadth * self.grid.size), 1)
 
+    def reveal_neighbors(self, row, col):
+        for dx in [-1, 0, 1]:
+            for dy in [-1, 0, 1]:
+                x = row + dx
+                y = col + dy
+                if self.grid.isTileInGrid(x, y):
+                    if not self.grid.isRevealed(x, y) and not self.grid.grid[x][y].bomb:
+                        self.grid.setRevealed(x, y, True)
+                        self.tiles_to_reveal -= 1
+                        if self.grid.isSafeTile(x, y):
+                            self.reveal_neighbors(x, y)
+
     def handle_event(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN:
             clicked_col = event.pos[0] // self.breadth
@@ -63,4 +76,30 @@ class Game:
                 else:
                     self.grid.setFlagged(clicked_row, clicked_col ,True)
             
+        return True
+    def agent_play(self, delay_ms=1000):
+        if self.tiles_to_reveal == 0:
+            print("Agent won!")
+            return False
+
+        unrevealed_tiles = [(i, j) for i in range(self.grid.size) for j in range(self.grid.size)
+                            if not self.grid.isRevealed(i, j)]
+
+        if unrevealed_tiles:
+            
+            random_tile = unrevealed_tiles[randint(0, len(unrevealed_tiles) - 1)]
+            row, col = random_tile
+
+            
+            self.grid.setRevealed(row, col, True)
+            if self.grid.grid[row][col].bomb:
+                print("Game Over!")
+                return False
+
+            self.tiles_to_reveal -= 1
+            if self.grid.isSafeTile(row, col):
+                self.reveal_neighbors(row, col)
+
+            pygame.time.delay(delay_ms+200)
+
         return True
