@@ -1,4 +1,4 @@
-from random import randint
+from random import shuffle
 from tile import Tile
 
 class Grid:
@@ -9,13 +9,13 @@ class Grid:
         self.calculate_adjacent_bombs()
 
     def place_bombs(self, bombs_num):
-        for _ in range(bombs_num):
-            while True:
-                x = randint(0, self.size - 1)
-                y = randint(0, self.size - 1)
-                if not self.grid[x][y].bomb:
-                    self.grid[x][y].bomb = True
-                    break
+        all_positions = [(x, y) for x in range(self.size) for y in range(self.size)]
+        shuffle(all_positions)
+    
+        bomb_positions = all_positions[:bombs_num]
+
+        for x, y in bomb_positions:
+            self.grid[x][y].bomb = True
 
     def calculate_adjacent_bombs(self):
         for i in range(self.size):
