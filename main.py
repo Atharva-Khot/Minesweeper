@@ -1,13 +1,14 @@
-from random import randint
+import time
 
 import pygame
+
 from game import Game
-import time
+
 
 def main():
 
     SIZE = 10
-    BOMBS = 5
+    BOMBS = 3
     BREADTH = 50
 
     pygame.init()
@@ -16,16 +17,12 @@ def main():
 
     game = Game(SIZE, BOMBS, BREADTH)
 
-    maxGames = 10
+    maxGames = 100
     gamesPlayed = 0
     running = True
     while gamesPlayed < maxGames:
         screen.fill((255, 255, 255))
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-            running = game.handle_event(event)
-        #running = game.agent_play()
+        running = game.agent_play()
         game.draw(screen)
         pygame.display.flip()
         clock.tick(60)
