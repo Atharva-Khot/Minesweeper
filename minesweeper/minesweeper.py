@@ -166,6 +166,58 @@ class Game(object):
 
     def IsActionValid(self,row,col):
         return not(self.exposed[row][col])
+    
+    # def count_flagged_tiles(self, board, flags):
+    #     """
+    #     Returns the number of flagged tiles and the number of correctly flagged tiles.
+    #     """
+    #     num_flagged = len(flags)
+    #     if num_flagged == 0:
+    #         return 0, 0
+        
+    #     flagged_tiles = np.zeros((self.width, self.height), dtype=bool)
+    #     for flag in flags:
+    #         flagged_tiles[flag[0], flag[1]] = True
+        
+    #     correctly_flagged = np.logical_and(flagged_tiles, board)
+    #     num_correctly_flagged = np.sum(correctly_flagged)
+        
+    #     return num_flagged, num_correctly_flagged
+
+    def count_flagged_tiles(self):
+        """
+        Returns the number of flagged tiles and the number of correctly flagged tiles.
+        """
+        num_flagged = 0
+        num_correctly_flagged = 0
+        checked_tiles = set()  # Keep track of checked tiles
+        
+        for x in range(self.width):
+            for y in range(self.height):
+                if self.exposed[x][y] and self.counts[x][y] > 0:
+                    num_not_exposed = self._get_not_exposed_neighbors(x, y, checked_tiles)
+                    if num_not_exposed == self.counts[x][y]:
+                        num_flagged += 1
+                        if self.board[x][y]:
+                            num_correctly_flagged += 1
+        
+        return num_flagged, num_correctly_flagged
+    
+    def _get_not_exposed_neighbors(self, x, y, checked_tiles):
+        """
+        Returns the number of not exposed tiles surrounding the given position.
+        """
+        num_not_exposed = 0
+        for x_offset in [-1, 0, 1]:
+            for y_offset in [-1, 0, 1]:
+                if x_offset != 0 or y_offset != 0:
+                    new_x = x + x_offset
+                    new_y = y + y_offset
+                    if not self._is_outside_board(new_x, new_y) and not self.exposed[new_x][new_y] and (new_x, new_y) not in checked_tiles and (new_x, new_y) not in self.flags:
+                        num_not_exposed += 1
+                        checked_tiles.add((new_x, new_y))
+        return num_not_exposed
+
 
 
 class Position(object):
